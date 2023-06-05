@@ -23,7 +23,7 @@
 //!
 //! ```rust
 //! use tokio::time;
-//! use tokio_context::context::Context;
+//! use tokio_context_next::context::Context;
 //! use std::time::Duration;
 //!
 //! async fn task_that_takes_too_long() {
@@ -54,7 +54,7 @@
 //! use std::time::Duration;
 //! use tokio::time;
 //! use tokio::task;
-//! use tokio_context::context::Context;
+//! use tokio_context_next::context::Context;
 //!
 //! async fn task_that_takes_too_long(mut ctx: Context) {
 //!     tokio::select! {
@@ -95,7 +95,7 @@
 //! use std::time::Duration;
 //! use tokio::time;
 //! use tokio::task;
-//! use tokio_context::context::RefContext;
+//! use tokio_context_next::context::RefContext;
 //!
 //! #[tokio::test]
 //! async fn cancelling_parent_ctx_cancels_child() {
@@ -167,7 +167,7 @@
 //! ```rust
 //! use std::time::Duration;
 //! use tokio::time;
-//! use tokio_context::task::TaskController;
+//! use tokio_context_next::task::TaskController;
 //!
 //! async fn task_that_takes_too_long() {
 //!     time::sleep(time::Duration::from_secs(60)).await;

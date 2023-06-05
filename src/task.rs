@@ -1,6 +1,6 @@
 use std::{future::Future, time::Duration};
 use tokio::sync::broadcast::Sender;
-use tokio::{sync::broadcast, time::Instant};
+use tokio::{sync::broadcast, time::Instant, task::JoinHandle};
 
 /// Handles spawning tasks which can also be cancelled by calling `cancel` on the task controller.
 /// If a [`std::time::Duration`] is supplied using the
@@ -18,7 +18,7 @@ use tokio::{sync::broadcast, time::Instant};
 /// ```rust
 /// use std::time::Duration;
 /// use tokio::time;
-/// use tokio_context::task::TaskController;
+/// use tokio_context_next::task::TaskController;
 ///
 /// async fn task_that_takes_too_long() {
 ///     time::sleep(time::Duration::from_secs(60)).await;
@@ -48,6 +48,12 @@ use tokio::{sync::broadcast, time::Instant};
 pub struct TaskController {
     timeout: Option<Instant>,
     cancel_sender: Sender<()>,
+}
+
+impl Default for TaskController {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl TaskController {
@@ -80,14 +86,14 @@ impl TaskController {
     /// TaskController will obey the optional timeout that may have been supplied during
     /// construction of the TaskController. They will also be cancelled if `cancel()` is ever
     /// called. Returns a JoinHandle from the internally generated task.
-    pub fn spawn<T>(&mut self, future: T) -> tokio::task::JoinHandle<Option<T::Output>>
+    pub fn spawn<T>(&mut self, future: T) -> JoinHandle<Option<T::Output>>
     where
         T: Future + Send + 'static,
         T::Output: Send + 'static,
     {
         let mut rx = self.cancel_sender.subscribe();
         if let Some(instant) = self.timeout {
-            tokio::task::spawn(async move {
+            tokio::spawn(async move {
                 tokio::select! {
                     res = future => Some(res),
                     _ = rx.recv() => None,
@@ -95,7 +101,7 @@ impl TaskController {
                 }
             })
         } else {
-            tokio::task::spawn(async move {
+            tokio::spawn(async move {
                 tokio::select! {
                     res = future => Some(res),
                     _ = rx.recv() => None,
